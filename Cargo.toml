@@ -7,5 +7,5 @@ edition = "2021"
 
 [dependencies]
 # winapi is the crate for the Windows API
-winapi = { version = "^0.3", features = ["minwinbase", "processthreadsapi", "minwindef", "libloaderapi", "memoryapi", "winnt", "winuser", "basetsd", "tlhelp32", "handleapi", "winbase", "synchapi", "windef"] }
+winapi = { version = "^0.3", features = ["minwinbase", "processthreadsapi", "minwindef", "libloaderapi", "memoryapi", "winnt", "winuser", "basetsd", "handleapi", "winbase", "synchapi", "windef"] }
 widestring = "1.0.0-beta.1"

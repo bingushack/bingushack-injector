@@ -4,19 +4,18 @@ use widestring::WideCString;
 use winapi::um::winnt::{HANDLE, PROCESS_ALL_ACCESS, MEM_COMMIT, MEM_RESERVE, PAGE_READWRITE, MEM_RELEASE};
 use winapi::um::winuser::{FindWindowA, GetWindowThreadProcessId};
 use winapi::_core::ptr::null_mut;
-use std::ffi::{CString, OsString};
+use std::ffi::CString;
 use winapi::um::processthreadsapi::{OpenProcess, CreateRemoteThread};
-use winapi::shared::minwindef::{HMODULE, FARPROC, BOOL, DWORD, TRUE, MAX_PATH, FALSE, LPVOID};
-use winapi::um::libloaderapi::{GetModuleHandleW, GetProcAddress, FreeLibraryAndExitThread};
+use winapi::shared::minwindef::{HMODULE, FARPROC, BOOL, DWORD, FALSE, LPVOID};
+use winapi::um::libloaderapi::{GetModuleHandleW, GetProcAddress};
 use winapi::um::memoryapi::{VirtualAllocEx, VirtualFreeEx, WriteProcessMemory};
-use std::os::windows::ffi::{OsStrExt, OsStringExt};
+use std::os::windows::ffi::OsStrExt;
 use winapi::shared::basetsd::SIZE_T;
-use winapi::um::tlhelp32::{TH32CS_SNAPMODULE, MAX_MODULE_NAME32, MODULEENTRY32W, CreateToolhelp32Snapshot, Module32FirstW, Module32NextW};
-use winapi::um::handleapi::{INVALID_HANDLE_VALUE, CloseHandle};
+use winapi::um::handleapi::CloseHandle;
 use winapi::ctypes::c_void;
 use winapi::um::winbase::INFINITE;
 use winapi::um::synchapi::WaitForSingleObject;
-use winapi::shared::windef::{HWND, HWND__};
+use winapi::shared::windef::HWND;
 #[cfg(not(target_os = "windows"))]
 compile_error!("this only works for windows");
 
