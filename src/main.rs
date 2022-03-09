@@ -159,5 +159,5 @@ fn main() {
         CloseHandle(handle);
     }
 
-    println!("press right arrow to eject");
+    println!("press down arrow to eject");
 }
