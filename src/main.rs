@@ -2,7 +2,7 @@ use std::path::Path;
 use core::mem;
 use widestring::WideCString;
 use winapi::um::winnt::{HANDLE, PROCESS_ALL_ACCESS, MEM_COMMIT, MEM_RESERVE, PAGE_READWRITE, MEM_RELEASE};
-use winapi::um::winuser::{FindWindowA, GetWindowThreadProcessId};
+use winapi::um::winuser::{SetWindowsHookExA, FindWindowA, GetWindowThreadProcessId};
 use winapi::_core::ptr::null_mut;
 use std::ffi::CString;
 use winapi::um::processthreadsapi::{OpenProcess, CreateRemoteThread};
@@ -28,18 +28,18 @@ fn obtain_handle_and_pid() -> HANDLE {
         // this is ugly
         let mut hwnd: HWND = FindWindowA(
             null_mut(),
-            CString::new("Minecraft* 1.17.1").unwrap().as_ptr(),
+            CString::new("Minecraft* 1.18.2").unwrap().as_ptr(),
         );
         if hwnd == null_mut() {
             hwnd = FindWindowA(
                 null_mut(),
-                CString::new("Minecraft* 1.17.1 - Multiplayer (3rd-party Server)").unwrap().as_ptr(),
+                CString::new("Minecraft* 1.18.2 - Multiplayer (3rd-party Server)").unwrap().as_ptr(),
             );
         }
         if hwnd == null_mut() {
             hwnd = FindWindowA(
                 null_mut(),
-                CString::new("Minecraft* 1.17.1 - Singleplayer").unwrap().as_ptr(),
+                CString::new("Minecraft* 1.18.2 - Singleplayer").unwrap().as_ptr(),
             );
         }
         if hwnd == null_mut() {
