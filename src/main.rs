@@ -21,34 +21,27 @@ compile_error!("this only works for windows");
 
 
 fn obtain_handle_and_pid() -> HANDLE {
-    let mut process_id: u32 = 0;
-    let process_id_ptr: *mut u32 = &mut process_id;
-
-    unsafe {
-        // this is ugly
-        let mut hwnd: HWND = FindWindowA(
-            null_mut(),
-            CString::new("Minecraft 1.18.2").unwrap().as_ptr(),
-        );
-        if hwnd == null_mut() {
-            hwnd = FindWindowA(
-                null_mut(),
-                CString::new("Minecraft 1.18.2 - Multiplayer (3rd-party Server)").unwrap().as_ptr(),
-            );
+    let handle = get_handle("Minecraft 1.18.2")
+        .or_else(|| get_handle("Minecraft 1.18.2 - Multiplayer (3rd-party Server)"))
+        .or_else(|| get_handle("Minecraft 1.18.2 - Singleplayer"));
+    if let Some(hwnd) = handle {
+        unsafe {
+            let mut pid: u32 = 0;
+            GetWindowThreadProcessId(hwnd, &mut pid);
+            OpenProcess(PROCESS_ALL_ACCESS, i32::from(false), pid)
         }
-        if hwnd == null_mut() {
-            hwnd = FindWindowA(
-                null_mut(),
-                CString::new("Minecraft 1.18.2 - Singleplayer").unwrap().as_ptr(),
-            );
-        }
-        if hwnd == null_mut() {
-            panic!("cannot find the Minecraft process.")
-        }
+    } else {
+        panic!("cannot find the Minecraft process.");
+    }
+}
 
-        GetWindowThreadProcessId(hwnd, process_id_ptr);
-
-        OpenProcess(PROCESS_ALL_ACCESS, i32::from(false), *process_id_ptr)
+fn get_handle(name: &str) -> Option<HWND> {
+    let window_name = CString::new(name).unwrap();
+    let hwnd = unsafe { FindWindowA(null_mut(), window_name.as_ptr()) };
+    if hwnd == null_mut() {
+        None
+    } else {
+        Some(hwnd)
     }
 }
 
