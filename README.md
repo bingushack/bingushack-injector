@@ -4,4 +4,4 @@
 
 only works on windows
 
-run it with the path of the bingushack dll as an argument while Minecraft 1.17 is open, using fabric (not vanilla or forge).
+run it with the path of the bingushack dll as an argument while Minecraft 1.18.2 is open, using vanilla (not fabric or forge).
