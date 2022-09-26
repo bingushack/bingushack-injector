@@ -10,6 +10,6 @@ edition = "2021"
 winapi = { version = "^0.3", features = ["minwinbase", "processthreadsapi", "minwindef", "libloaderapi", "memoryapi", "winnt", "winuser", "basetsd", "handleapi", "winbase", "synchapi", "windef"] }
 widestring = "1.0.0-beta.1"
 
-[profile.dev.build-override]
-opt-level = 3
+# [profile.dev.build-override]
+# opt-level = 3
 
