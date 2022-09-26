@@ -25,20 +25,20 @@ fn obtain_handle_and_pid() -> HANDLE {
     let process_id_ptr: *mut u32 = &mut process_id;
 
     unsafe {
-        let one_19_2 = CString::new("*Minecraft 1.19.2").unwrap();
+        let one_19_2 = CString::new("*Minecraft* 1.19.2").unwrap();
         // this is ugly
         let mut hwnd: HWND = FindWindowA(
             null_mut(),
             one_19_2.as_ptr(),
         );
-        let one_19_2_multiplayer = CString::new("*Minecraft 1.19.2 - Multiplayer (3rd-party Server)").unwrap();
+        let one_19_2_multiplayer = CString::new("Minecraft* 1.19.2 - Multiplayer (3rd-party Server)").unwrap();
         if hwnd == null_mut() {
             hwnd = FindWindowA(
                 null_mut(),
                 one_19_2_multiplayer.as_ptr(),
             );
         }
-        let one_19_2_singleplayer = CString::new("*Minecraft 1.19.2 - Singleplayer").unwrap();
+        let one_19_2_singleplayer = CString::new("*Minecraft* 1.19.2 - Singleplayer").unwrap();
         if hwnd == null_mut() {
             hwnd = FindWindowA(
                 null_mut(),
