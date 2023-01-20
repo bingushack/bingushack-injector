@@ -25,24 +25,27 @@ fn obtain_handle_and_pid() -> HANDLE {
     let process_id_ptr: *mut u32 = &mut process_id;
 
     unsafe {
-        let one_19_2 = CString::new("Minecraft* 1.19.2").unwrap();
+        let one_19_2 = CString::new("Minecraft 1.19.3").unwrap();
+        let one_19_2_ptr = one_19_2.as_ptr();
         // this is ugly
         let mut hwnd: HWND = FindWindowA(
             null_mut(),
-            one_19_2.as_ptr(),
+            one_19_2_ptr,
         );
-        let one_19_2_multiplayer = CString::new("Minecraft* 1.19.2 - Multiplayer (3rd-party Server)").unwrap();
+        let one_19_2_multiplayer = CString::new("Minecraft 1.19.3 - Multiplayer (3rd-party Server)").unwrap();
+        let one_19_2_multiplayer_ptr = one_19_2_multiplayer.as_ptr();
         if hwnd == null_mut() {
             hwnd = FindWindowA(
                 null_mut(),
-                one_19_2_multiplayer.as_ptr(),
+                one_19_2_multiplayer_ptr,
             );
         }
-        let one_19_2_singleplayer = CString::new("Minecraft* 1.19.2 - Singleplayer").unwrap();
+        let one_19_2_singleplayer = CString::new("Minecraft 1.19.3 - Singleplayer").unwrap();
+        let one_19_2_singleplayer_ptr = one_19_2_singleplayer.as_ptr();
         if hwnd == null_mut() {
             hwnd = FindWindowA(
                 null_mut(),
-                one_19_2_singleplayer.as_ptr(),
+                one_19_2_singleplayer_ptr,
             );
         }
         if hwnd == null_mut() {
@@ -57,7 +60,7 @@ fn obtain_handle_and_pid() -> HANDLE {
 
 
 // credits: https://github.com/amcarthur/hammer/blob/master/src/main.rs
-fn inject_library(process_handle: HANDLE, dll_path: &Path) -> bool {
+fn inject_library(process_handle: HANDLE, dll_path: CString) -> bool {
 
     if process_handle == null_mut() {
         println!("Process does not exist or is not accessible.");
@@ -69,10 +72,12 @@ fn inject_library(process_handle: HANDLE, dll_path: &Path) -> bool {
     let remote_string: *mut c_void;
 
     let kernel32_str = WideCString::from_str("Kernel32.dll").unwrap();
+    let kernel32_str_ptr = kernel32_str.as_ptr();
     let load_library_str = CString::new("LoadLibraryW").unwrap();
+    let load_library_str_ptr = load_library_str.as_ptr();
 
     unsafe {
-        kernel32_module = GetModuleHandleW(kernel32_str.as_ptr());
+        kernel32_module = GetModuleHandleW(kernel32_str_ptr);
     }
 
     if kernel32_module == null_mut() {
@@ -81,7 +86,7 @@ fn inject_library(process_handle: HANDLE, dll_path: &Path) -> bool {
     }
 
     unsafe {
-        load_library_address = GetProcAddress(kernel32_module, load_library_str.as_ptr());
+        load_library_address = GetProcAddress(kernel32_module, load_library_str_ptr);
     }
 
     if load_library_address == null_mut() {
@@ -89,8 +94,7 @@ fn inject_library(process_handle: HANDLE, dll_path: &Path) -> bool {
         return false;
     }
 
-    let dll_path_str = dll_path.as_os_str();
-    let dll_path_size: u64 = ((dll_path_str.len() + 1) * mem::size_of::<u16>()) as u64;
+    let dll_path_size: u64 = ((dll_path.as_bytes_with_nul().len()) * mem::size_of::<u16>()) as u64;
 
     unsafe {
         remote_string = VirtualAllocEx(process_handle, null_mut(), dll_path_size as usize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
@@ -104,9 +108,10 @@ fn inject_library(process_handle: HANDLE, dll_path: &Path) -> bool {
     let mut bytes_written: SIZE_T = 0;
     let bytes_written_ptr: *mut SIZE_T = &mut bytes_written as *mut _ as *mut SIZE_T;
     let wpm_ret: BOOL;
-
+    let wpm_buffer = WideCString::from_str(dll_path.to_str().unwrap()).unwrap();
+    let wpm_buffer_ptr = wpm_buffer.as_ptr();
     unsafe {
-        wpm_ret = WriteProcessMemory(process_handle, remote_string, dll_path_str.encode_wide().collect::<Vec<_>>().as_ptr() as *const c_void, dll_path_size as usize, bytes_written_ptr);
+        wpm_ret = WriteProcessMemory(process_handle, remote_string, wpm_buffer_ptr as *const c_void, dll_path_size as usize, bytes_written_ptr);
     }
 
     if wpm_ret == FALSE || bytes_written < dll_path_size as usize {
@@ -148,10 +153,10 @@ fn main() {
     if arguments.len() != 2 {
         panic!("provide the directory of your dll and nothing else.")
     }
-    let dll_path = std::env::current_dir().unwrap().join(Path::new( arguments.get(1).unwrap()));
+    let dll_path = CString::new(std::env::current_dir().unwrap().join(Path::new( arguments.get(1).unwrap())).to_str().unwrap()).unwrap();
 
     let handle = obtain_handle_and_pid();
-    let injected = inject_library(handle, dll_path.as_path());
+    let injected = inject_library(handle, dll_path);
     if injected {
         println!("\ninjected.\n");
     } else {
