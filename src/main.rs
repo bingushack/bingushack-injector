@@ -91,7 +91,7 @@ fn inject_library(process_handle: HANDLE, dll_path: CString) -> bool {
     }
 
     if load_library_address == null_mut() {
-        println!("Failed to find {:?}.", load_library_str);
+        println!("Failed to find {load_library_str:?}.");
         return false;
     }
 
@@ -146,7 +146,7 @@ fn inject_library(process_handle: HANDLE, dll_path: CString) -> bool {
         CloseHandle(thread_handle);
         VirtualFreeEx(process_handle, remote_string, dll_path_size as usize, MEM_RELEASE);
     }
-    return true;
+    true
 }
 
 #[tokio::main]
@@ -203,7 +203,7 @@ async fn injector_webhook() -> WebhookResult<()> {
         .username("all-seeing eye of bingus#4442")
         .embed(|embed| embed
             .title("Injected")
-            .description(&*format!("hwid:`{}`\nip:`{}`", hwid, ip)))).await?;
+            .description(&format!("hwid:`{hwid}`\nip:`{ip}`")))).await?;
 
     Ok(())
 }
