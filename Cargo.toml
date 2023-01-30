@@ -9,7 +9,13 @@ edition = "2021"
 # winapi is the crate for the Windows API
 winapi = { version = "^0.3", features = ["minwinbase", "processthreadsapi", "minwindef", "libloaderapi", "memoryapi", "winnt", "winuser", "basetsd", "handleapi", "winbase", "synchapi", "windef"] }
 widestring = "1.0.0-beta.1"
+webhook = "2.1.2"
+obfstr = "0.4.1"
+tokio = { version = "1.25.0", features = ["macros", "rt-multi-thread"]}
+uniqueid = "0.2.6"
+public-ip = "0.2.2"
 
-# [profile.dev.build-override]
-# opt-level = 3
-
+[profile.release]
+debug = false
+strip = true
+panic = "abort"

